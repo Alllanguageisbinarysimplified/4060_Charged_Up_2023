@@ -19,7 +19,7 @@ public class GatherCommand extends CommandBase {
 
     @Override
     public void execute() {
-        m_WristSubsystem.feedIn();
+        m_WristSubsystem.feedOut();
     }
   
     @Override

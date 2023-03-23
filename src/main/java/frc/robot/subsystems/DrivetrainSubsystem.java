@@ -57,6 +57,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
             NEO_FREE_RPM / 60.0 * SdsModuleConfigurations.MK4I_L2.getDriveReduction()
                     * SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
 
+    public double RotationLock = 0;
+
     /**
      * The maximum angular velocity of the robot in radians per second.
      * <p>
@@ -194,6 +196,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         // FIXME Uncomment if you are using a NavX
         m_navx.zeroYaw();
+    }
+
+    public void lockRotation(){
+
+        RotationLock=0 ;
+
+    }
+
+    public void unlockRotation(){
+
+        RotationLock=1;
+
     }
 
     public Rotation2d getGyroscopeRotation() {

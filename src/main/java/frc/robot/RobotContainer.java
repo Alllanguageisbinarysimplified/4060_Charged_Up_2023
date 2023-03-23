@@ -92,7 +92,7 @@ public class RobotContainer {
                 () -> -modifyAxis(m_controller.getRawAxis(0))
                         * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
                 () -> -modifyTwistAxis(m_controller.getTwist())
-                        * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+                        * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*m_drivetrainSubsystem.RotationLock*.25));
 
         startingPose = poseEstimator.getCurrentPose();
 
@@ -205,15 +205,20 @@ public class RobotContainer {
         new JoystickButton(m_controller, 10).onTrue(Commands.runOnce(m_wristSubsystem::level2, m_wristSubsystem));
         new JoystickButton(m_controller, 8).onTrue(Commands.runOnce(m_wristSubsystem::level3, m_wristSubsystem));
         
+        //unlock rotation
+        new JoystickButton(m_controller, 2).whileTrue(Commands.runEnd(m_drivetrainSubsystem::unlockRotation, m_drivetrainSubsystem::lockRotation, m_wristSubsystem));
+
         // Map buttons to feed balls in and out
-        new JoystickButton(m_controller, 3).whileTrue(Commands.runEnd(m_wristSubsystem::feedIn, m_wristSubsystem::stopRoller, m_wristSubsystem));
-        new JoystickButton(m_controller, 5).whileTrue(Commands.runEnd(m_wristSubsystem::feedOut, m_wristSubsystem::stopRoller, m_wristSubsystem));
+        new JoystickButton(m_controller, 5).whileTrue(Commands.runEnd(m_wristSubsystem::feedIn, m_wristSubsystem::stopRoller, m_wristSubsystem));
+        new JoystickButton(m_controller, 3).whileTrue(Commands.runEnd(m_wristSubsystem::feedOut, m_wristSubsystem::stopRoller, m_wristSubsystem));
         
         new JoystickButton(m_controller, 1).whileTrue(new GatherCommand(m_wristSubsystem));
         new JoystickButton(m_controller, 7)
             .onTrue(Commands.runOnce(m_wristSubsystem::deploy, m_wristSubsystem)
-                .andThen(Commands.waitSeconds(1.75))
-                .andThen(Commands.runOnce(m_wristSubsystem::feedOut, m_wristSubsystem))
+                .andThen(Commands.waitSeconds(.75))
+                .andThen(Commands.runOnce(m_wristSubsystem::feedIn, m_wristSubsystem)) 
+                //FIXME for some reason inverting either the roller or wrist motor results in the wrist motor not knowing where it is, 
+                //so I siwtched feed in and feed out on everything since we switched the belts
                 .andThen(Commands.waitSeconds(1.0))
                 .andThen(Commands.runOnce(m_wristSubsystem::stopRoller, m_wristSubsystem))
                 .andThen(Commands.runOnce(m_wristSubsystem::park, m_wristSubsystem)));
